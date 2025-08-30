@@ -29,3 +29,110 @@
   <div class="links muted" style="margin-top:6px">
     JSON: <a href="last.json" target="_blank">last.json</a> · <a href="signals.json" target="_blank">signals.json</a>
   </div>
+
+  <section id="snapshot">
+    <h2>Актуальный TOP</h2>
+    <div class="muted" id="snap-meta">Загрузка…</div>
+    <div id="snap-body"></div>
+  </section>
+
+  <section id="history">
+    <h2>Лента изменений</h2>
+    <div class="muted" id="hist-meta">Загрузка…</div>
+    <div id="hist-body"></div>
+  </section>
+
+<script>
+const fmtLocal = s => {
+  try { return new Date(s).toLocaleString(); } catch { return s || ""; }
+};
+const clsByDir = d => d==='up'?'apr-up':d==='down'?'apr-down':'apr-same';
+const arrowByDir = d => d==='up'?'▲':(d==='down'?'▼':'·');
+
+async function safeFetch(url){
+  try{
+    const r = await fetch(url+'?t=' + Date.now());
+    if(!r.ok) throw new Error(r.status);
+    return await r.json();
+  }catch(e){ return null; }
+}
+
+function renderSnapshot(snap){
+  const meta = document.getElementById('snap-meta');
+  const body = document.getElementById('snap-body');
+  if(!snap || !snap.top || !snap.top.length){
+    meta.textContent = 'Нет данных (ожидается первый пуш last.json).';
+    body.innerHTML = '';
+    return;
+  }
+  meta.innerHTML = `
+    Обновлено: <b>${fmtLocal(snap.ts)}</b> · Пара: <b>${snap.pair}</b> · Тип: <span class="tag">${snap.type}</span>
+  `;
+  const rows = snap.top.map(x=>`
+    <tr>
+      <td>${x.pid||''}</td>
+      <td>${x.strike}</td>
+      <td>${x.days}</td>
+      <td>${x.apr}%</td>
+      <td class="muted">${x.settle||''}</td>
+    </tr>`).join('');
+  body.innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Product ID</th><th>Страйк</th><th>Дней</th><th>APR</th><th>Расчёт</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function renderHistory(hist){
+  const meta = document.getElementById('hist-meta');
+  const body = document.getElementById('hist-body');
+  const arr = (hist && hist.signals) ? hist.signals : [];
+  if(!arr.length){
+    meta.textContent = 'Нет изменений.';
+    body.innerHTML = '';
+    return;
+  }
+  meta.textContent = `Показано ${arr.length} последних записей`;
+  const rows = arr.map(s=>{
+    const cls = clsByDir(s.dir);
+    const arrow = arrowByDir(s.dir);
+    const delta = (s.apr_delta_pp!==undefined) ? ` (${s.apr_delta_pp>0?'+':''}${s.apr_delta_pp} п.п.)` : '';
+    return `
+      <tr>
+        <td class="muted">${fmtLocal(s.ts)}</td>
+        <td>${s.pair||''}</td>
+        <td><span class="tag">${s.type||''}</span></td>
+        <td class="${cls}">${s.apr_pct}% ${arrow}${delta}</td>
+        <td>${s.strike}</td>
+        <td>${s.days}</td>
+        <td class="muted">${s.settle||''}</td>
+        <td class="muted">${s.product_id||''}</td>
+      </tr>`;
+  }).join('');
+  body.innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Время</th><th>Пара</th><th>Тип</th><th>APR</th>
+        <th>Страйк</th><th>Дней</th><th>Расчёт</th><th>ID</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+async function refresh(){
+  const [snap, hist] = await Promise.all([
+    safeFetch('last.json'),
+    safeFetch('signals.json')
+  ]);
+  renderSnapshot(snap);
+  renderHistory(hist);
+}
+refresh();
+setInterval(refresh, 10000);
+</script>
+</body>
+</html>
