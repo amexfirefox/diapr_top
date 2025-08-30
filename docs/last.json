@@ -1,0 +1,51 @@
+{
+  "ts": "2025-08-30T10:26:17Z",
+  "pair": "ETH/USDT",
+  "type": "PUT",
+  "top": [
+    {
+      "pid": "2229635",
+      "apr": 159.39,
+      "strike": 4375.0,
+      "days": 4,
+      "settle": 1756886400000
+    },
+    {
+      "pid": "2196057",
+      "apr": 157.3,
+      "strike": 4375.0,
+      "days": 3,
+      "settle": 1756800000000
+    },
+    {
+      "pid": "2227711",
+      "apr": 152.83,
+      "strike": 4375.0,
+      "days": 2,
+      "settle": 1756713600000
+    },
+    {
+      "pid": "2229666",
+      "apr": 139.33,
+      "strike": 4350.0,
+      "days": 4,
+      "settle": 1756886400000
+    },
+    {
+      "pid": "2196035",
+      "apr": 139.05,
+      "strike": 4375.0,
+      "days": 6,
+      "settle": 1757059200000
+    }
+  ],
+  "filters": {
+    "min_apr_pct": 0.0,
+    "top_n": 5,
+    "duration_set": [],
+    "min_days": null,
+    "max_days": null,
+    "strike_min": null,
+    "strike_max": null
+  }
+}
