@@ -1,6 +1,116 @@
 {
   "signals": [
     {
+      "ts": "2025-08-30T09:34:11Z",
+      "pair": "ETH/USDT",
+      "type": "PUT",
+      "apr_pct": 185.15,
+      "strike": 4375.0,
+      "days": 2,
+      "settle": 1756713600000,
+      "product_id": "2227711",
+      "dir": "same"
+    },
+    {
+      "ts": "2025-08-30T09:34:11Z",
+      "pair": "ETH/USDT",
+      "type": "PUT",
+      "apr_pct": 176.14,
+      "strike": 4375.0,
+      "days": 3,
+      "settle": 1756800000000,
+      "product_id": "2196057",
+      "dir": "down"
+    },
+    {
+      "ts": "2025-08-30T09:34:11Z",
+      "pair": "ETH/USDT",
+      "type": "PUT",
+      "apr_pct": 167.96,
+      "strike": 4375.0,
+      "days": 4,
+      "settle": 1756886400000,
+      "product_id": "2229635",
+      "dir": "down"
+    },
+    {
+      "ts": "2025-08-30T09:34:11Z",
+      "pair": "ETH/USDT",
+      "type": "PUT",
+      "apr_pct": 154.42,
+      "strike": 4350.0,
+      "days": 3,
+      "settle": 1756800000000,
+      "product_id": "2195873",
+      "dir": "up"
+    },
+    {
+      "ts": "2025-08-30T09:34:11Z",
+      "pair": "ETH/USDT",
+      "type": "PUT",
+      "apr_pct": 151.69,
+      "strike": 4350.0,
+      "days": 2,
+      "settle": 1756713600000,
+      "product_id": "2227737",
+      "dir": "same"
+    },
+    {
+      "ts": "2025-08-30T09:34:11Z",
+      "pair": "ETH/USDT",
+      "type": "PUT",
+      "apr_pct": 151.46,
+      "strike": 4375.0,
+      "days": 6,
+      "settle": 1757059200000,
+      "product_id": "2196035",
+      "dir": "same"
+    },
+    {
+      "ts": "2025-08-30T09:34:11Z",
+      "pair": "ETH/USDT",
+      "type": "PUT",
+      "apr_pct": 149.54,
+      "strike": 4350.0,
+      "days": 4,
+      "settle": 1756886400000,
+      "product_id": "2229666",
+      "dir": "same"
+    },
+    {
+      "ts": "2025-08-30T09:34:11Z",
+      "pair": "ETH/USDT",
+      "type": "PUT",
+      "apr_pct": 145.63,
+      "strike": 4375.0,
+      "days": 5,
+      "settle": 1756972800000,
+      "product_id": "2230295",
+      "dir": "down"
+    },
+    {
+      "ts": "2025-08-30T09:34:11Z",
+      "pair": "ETH/USDT",
+      "type": "PUT",
+      "apr_pct": 137.02,
+      "strike": 4350.0,
+      "days": 6,
+      "settle": 1757059200000,
+      "product_id": "2192215",
+      "dir": "same"
+    },
+    {
+      "ts": "2025-08-30T09:34:11Z",
+      "pair": "ETH/USDT",
+      "type": "PUT",
+      "apr_pct": 131.11,
+      "strike": 4325.0,
+      "days": 3,
+      "settle": 1756800000000,
+      "product_id": "2195797",
+      "dir": "down"
+    },
+    {
       "ts": "2025-08-30T09:33:07Z",
       "pair": "ETH/USDT",
       "type": "PUT",
@@ -2088,116 +2198,6 @@
       "days": 4,
       "settle": 1756886400000,
       "product_id": "2229663",
-      "dir": "same"
-    },
-    {
-      "ts": "2025-08-30T09:26:36Z",
-      "pair": "ETH/USDT",
-      "type": "PUT",
-      "apr_pct": 127.08,
-      "strike": 4325.0,
-      "days": 3,
-      "settle": 1756800000000,
-      "product_id": "2195797",
-      "dir": "same"
-    },
-    {
-      "ts": "2025-08-30T09:26:36Z",
-      "pair": "ETH/USDT",
-      "type": "PUT",
-      "apr_pct": 126.56,
-      "strike": 4350.0,
-      "days": 5,
-      "settle": 1756972800000,
-      "product_id": "2230416",
-      "dir": "down"
-    },
-    {
-      "ts": "2025-08-30T09:26:36Z",
-      "pair": "ETH/USDT",
-      "type": "PUT",
-      "apr_pct": 120.74,
-      "strike": 4325.0,
-      "days": 6,
-      "settle": 1757059200000,
-      "product_id": "2187473",
-      "dir": "down"
-    },
-    {
-      "ts": "2025-08-30T09:26:36Z",
-      "pair": "ETH/USDT",
-      "type": "PUT",
-      "apr_pct": 112.89,
-      "strike": 4325.0,
-      "days": 5,
-      "settle": 1756972800000,
-      "product_id": "2230409",
-      "dir": "same"
-    },
-    {
-      "ts": "2025-08-30T09:26:36Z",
-      "pair": "ETH/USDT",
-      "type": "PUT",
-      "apr_pct": 112.79,
-      "strike": 4325.0,
-      "days": 2,
-      "settle": 1756713600000,
-      "product_id": "2227772",
-      "dir": "same"
-    },
-    {
-      "ts": "2025-08-30T09:26:36Z",
-      "pair": "ETH/USDT",
-      "type": "PUT",
-      "apr_pct": 112.78,
-      "strike": 4375.0,
-      "days": 13,
-      "settle": 1757664000000,
-      "product_id": "2196071",
-      "dir": "same"
-    },
-    {
-      "ts": "2025-08-30T09:26:36Z",
-      "pair": "ETH/USDT",
-      "type": "PUT",
-      "apr_pct": 112.42,
-      "strike": 4375.0,
-      "days": 10,
-      "settle": 1757404800000,
-      "product_id": "2223971",
-      "dir": "down"
-    },
-    {
-      "ts": "2025-08-30T09:26:36Z",
-      "pair": "ETH/USDT",
-      "type": "PUT",
-      "apr_pct": 110.18,
-      "strike": 4300.0,
-      "days": 4,
-      "settle": 1756886400000,
-      "product_id": "2229644",
-      "dir": "down"
-    },
-    {
-      "ts": "2025-08-30T09:26:36Z",
-      "pair": "ETH/USDT",
-      "type": "PUT",
-      "apr_pct": 108.06,
-      "strike": 4300.0,
-      "days": 6,
-      "settle": 1757059200000,
-      "product_id": "2187189",
-      "dir": "down"
-    },
-    {
-      "ts": "2025-08-30T09:26:36Z",
-      "pair": "ETH/USDT",
-      "type": "PUT",
-      "apr_pct": 107.69,
-      "strike": 4350.0,
-      "days": 13,
-      "settle": 1757664000000,
-      "product_id": "2192251",
       "dir": "same"
     }
   ]
