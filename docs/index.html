@@ -1,1 +1,43 @@
-
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>APR Signals</title>
+<style>
+ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:24px}
+ table{width:100%;border-collapse:collapse;margin-top:12px}
+ th,td{padding:8px 10px;border-bottom:1px solid #eee;text-align:left}
+ .apr-up{color:#1a7f37;font-weight:600} .apr-down{color:#d1242f;font-weight:600} .apr-same{opacity:.75}
+ .tag{display:inline-block;padding:2px 8px;border-radius:10px;border:1px solid #ddd;font-size:.85rem}
+ .muted{opacity:.7}
+</style></head><body>
+<h1>APR Signals — Dual Investment</h1>
+<div class="muted">Автообновление каждые 10 секунд</div>
+<div id="app">Загрузка…</div>
+<script>
+ async function load(){
+  try{
+   const r=await fetch('signals.json?ts='+Date.now());
+   const j=await r.json(); const a=j.signals||[];
+   if(!a.length){ document.getElementById('app').textContent='Пока нет сигналов.'; return;}
+   const rows=a.map(s=>`
+    <tr>
+      <td class="muted">${s.ts}</td>
+      <td>${s.pair}</td>
+      <td><span class="tag">${s.type}</span></td>
+      <td class="${s.dir==='up'?'apr-up':s.dir==='down'?'apr-down':'apr-same'}">
+        ${s.apr_pct}% ${s.dir==='up'?'▲':s.dir==='down'?'▼':'·'}
+      </td>
+      <td>${s.strike}</td>
+      <td>${s.days}</td>
+      <td class="muted">${s.settle}</td>
+      <td class="muted">${s.product_id||''}</td>
+    </tr>`).join('');
+   document.getElementById('app').innerHTML=`
+    <table>
+      <thead><tr>
+        <th>UTC</th><th>Пара</th><th>Тип</th><th>APR</th>
+        <th>Страйк</th><th>Дней</th><th>Расчёт</th><th>ID</th>
+      </tr></thead><tbody>${rows}</tbody>
+    </table>`;
+  }catch(e){ document.getElementById('app').textContent='Ошибка загрузки';}
+ }
+ load(); setInterval(load,10000);
+</script></body></html>
