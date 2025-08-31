@@ -1,138 +1,172 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Dual Investment APR — Dashboard</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ETH Dual Investment — APR Matrix</title>
 <style>
-  :root{--ok:#1a7f37;--down:#d1242f}
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:24px;line-height:1.45}
-  h1{margin:0 0 4px}
-  .muted{opacity:.7}
-  section{margin-top:18px}
-  table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{padding:8px 10px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}
-  th{position:sticky;top:0;background:#fff}
-  .tag{display:inline-block;padding:2px 8px;border-radius:10px;border:1px solid #ddd;font-size:.85rem}
-  .apr-up{color:var(--ok);font-weight:600}
-  .apr-down{color:var(--down);font-weight:600}
-  .apr-same{opacity:.75}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:8px 0}
-  .card{border:1px solid #eee;border-radius:10px;padding:10px}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .links a{color:inherit}
+  :root{
+    --bg:#0f1115; --card:#151821; --text:#e5e7eb; --muted:#9ca3af;
+    --up:#10b981; --dn:#ef4444; --grid:#2a2f3a; --head:#1f2430;
+  }
+  html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial}
+  .wrap{max-width:1100px;margin:18px auto;padding:0 14px}
+  .panel{background:var(--card);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .panel label{color:var(--muted);font-size:13px;margin-right:6px}
+  .panel input,.panel select{background:#0d1016;border:1px solid #232836;border-radius:8px;color:var(--text);padding:6px 10px}
+  .status{margin-left:auto;color:var(--muted);font-size:12px}
+  table{border-collapse:separate;border-spacing:0;width:100%;background:var(--card);border-radius:12px;overflow:hidden}
+  th,td{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);padding:8px 10px;text-align:center;white-space:nowrap}
+  th{background:var(--head);color:#cbd5e1;font-weight:600}
+  th:first-child, td:first-child{position:sticky;left:0;background:var(--head)}
+  tr td:first-child{background:var(--card);font-weight:600;color:#cbd5e1}
+  tr:last-child td{border-bottom:none}
+  td:last-child, th:last-child{border-right:none}
+  .up{color:var(--up)}
+  .dn{color:var(--dn)}
+  .muted{color:var(--muted)}
+  .note{color:var(--muted);font-size:12px;margin-top:8px}
 </style>
 </head>
 <body>
-  <h1>APR — Dual Investment</h1>
-  <div class="muted">Страница обновляется автоматически каждые 10 сек. Время в вашей локальной зоне.</div>
-  <div class="links muted" style="margin-top:6px">
-    JSON: <a href="last.json" target="_blank">last.json</a> · <a href="signals.json" target="_blank">signals.json</a>
+<div class="wrap">
+  <div class="panel">
+    <label>Pair</label>
+    <select id="pair">
+      <option>ETH/USDT</option>
+    </select>
+    <label>Type</label>
+    <select id="otype">
+      <option>PUT</option>
+      <option>CALL</option>
+    </select>
+    <label>Min APR %</label>
+    <input id="minapr" type="number" step="0.1" value="0" style="width:90px">
+    <label>Max strikes</label>
+    <input id="maxstr" type="number" value="20" style="width:80px">
+    <label>Refresh (s)</label>
+    <input id="interval" type="number" value="30" style="width:70px">
+    <span class="status" id="status">—</span>
   </div>
 
-  <section id="snapshot">
-    <h2>Актуальный TOP</h2>
-    <div class="muted" id="snap-meta">Загрузка…</div>
-    <div id="snap-body"></div>
-  </section>
-
-  <section id="history">
-    <h2>Лента изменений</h2>
-    <div class="muted" id="hist-meta">Загрузка…</div>
-    <div id="hist-body"></div>
-  </section>
+  <div id="table"></div>
+  <div class="note">Источник: <code>docs/signals.json</code> (последние значения по каждому (strike, days)). Цвет/стрелка — изменение относительно прошлого обновления страницы.</div>
+</div>
 
 <script>
-const fmtLocal = s => {
-  try { return new Date(s).toLocaleString(); } catch { return s || ""; }
+const cfg = {
+  url: 'signals.json',     // лежит рядом (docs/signals.json)
+  pair: 'ETH/USDT',
+  type: 'PUT',
+  minApr: 0,
+  maxStrikes: 20,
+  refreshMs: 30_000
 };
-const clsByDir = d => d==='up'?'apr-up':d==='down'?'apr-down':'apr-same';
-const arrowByDir = d => d==='up'?'▲':(d==='down'?'▼':'·');
 
-async function safeFetch(url){
+const statusEl = document.getElementById('status');
+const tableEl  = document.getElementById('table');
+const pairSel  = document.getElementById('pair');
+const typeSel  = document.getElementById('otype');
+const minAprIn = document.getElementById('minapr');
+const maxStrIn = document.getElementById('maxstr');
+const intIn    = document.getElementById('interval');
+
+let prevMap = new Map(); // key "strike|days" -> apr
+
+pairSel.value  = cfg.pair;
+typeSel.value  = cfg.type;
+minAprIn.value = cfg.minApr;
+maxStrIn.value = cfg.maxStrikes;
+intIn.value    = Math.round(cfg.refreshMs/1000);
+
+pairSel.onchange = typeSel.onchange = minAprIn.oninput = maxStrIn.oninput = intIn.oninput = () => {
+  cfg.pair       = pairSel.value;
+  cfg.type       = typeSel.value;
+  cfg.minApr     = parseFloat(minAprIn.value||'0');
+  cfg.maxStrikes = parseInt(maxStrIn.value||'20');
+  cfg.refreshMs  = Math.max(5, parseInt(intIn.value||'30'))*1000;
+  schedule(); // перезапустить таймер
+  pull();     // и сразу обновить
+};
+
+let timer = null;
+function schedule(){
+  if (timer) clearInterval(timer);
+  timer = setInterval(pull, cfg.refreshMs);
+}
+
+async function pull(){
+  const t0 = Date.now();
   try{
-    const r = await fetch(url+'?t=' + Date.now());
-    if(!r.ok) throw new Error(r.status);
-    return await r.json();
-  }catch(e){ return null; }
-}
-
-function renderSnapshot(snap){
-  const meta = document.getElementById('snap-meta');
-  const body = document.getElementById('snap-body');
-  if(!snap || !snap.top || !snap.top.length){
-    meta.textContent = 'Нет данных (ожидается первый пуш last.json).';
-    body.innerHTML = '';
-    return;
+    const res = await fetch(cfg.url + '?_=' + t0, {cache: 'no-store'});
+    if(!res.ok) throw new Error(res.status + ' ' + res.statusText);
+    const json = await res.json();
+    const sigs = Array.isArray(json?.signals) ? json.signals : [];
+    renderFromSignals(sigs);
+    statusEl.textContent = `Обновлено: ${new Date().toLocaleTimeString()} • ${sigs.length} записей`;
+  }catch(e){
+    statusEl.textContent = 'Ошибка загрузки: ' + (e.message || e);
   }
-  meta.innerHTML = `
-    Обновлено: <b>${fmtLocal(snap.ts)}</b> · Пара: <b>${snap.pair}</b> · Тип: <span class="tag">${snap.type}</span>
-  `;
-  const rows = snap.top.map(x=>`
-    <tr>
-      <td>${x.pid||''}</td>
-      <td>${x.strike}</td>
-      <td>${x.days}</td>
-      <td>${x.apr}%</td>
-      <td class="muted">${x.settle||''}</td>
-    </tr>`).join('');
-  body.innerHTML = `
-    <table>
-      <thead><tr>
-        <th>Product ID</th><th>Страйк</th><th>Дней</th><th>APR</th><th>Расчёт</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
 }
 
-function renderHistory(hist){
-  const meta = document.getElementById('hist-meta');
-  const body = document.getElementById('hist-body');
-  const arr = (hist && hist.signals) ? hist.signals : [];
-  if(!arr.length){
-    meta.textContent = 'Нет изменений.';
-    body.innerHTML = '';
-    return;
+function renderFromSignals(sigs){
+  // 1) фильтр пары/типа и берём ПОСЛЕДНЮЮ запись по (strike,days)
+  const last = new Map(); // key -> {apr,strike,days}
+  for(const s of sigs){
+    if(s.pair!==cfg.pair || s.type!==cfg.type) continue;
+    const strike = Number(s.strike);
+    const days   = parseInt(s.days);
+    const apr    = Number(s.apr_pct);
+    if(!isFinite(strike) || !isFinite(days) || !isFinite(apr)) continue;
+    if(apr < cfg.minApr) continue;
+    const key = `${strike}|${days}`;
+    // берём последнюю по времени (ts)
+    const prev = last.get(key);
+    if(!prev || String(s.ts) > String(prev.ts)) last.set(key, {ts:s.ts, apr, strike, days});
   }
-  meta.textContent = `Показано ${arr.length} последних записей`;
-  const rows = arr.map(s=>{
-    const cls = clsByDir(s.dir);
-    const arrow = arrowByDir(s.dir);
-    const delta = (s.apr_delta_pp!==undefined) ? ` (${s.apr_delta_pp>0?'+':''}${s.apr_delta_pp} п.п.)` : '';
-    return `
-      <tr>
-        <td class="muted">${fmtLocal(s.ts)}</td>
-        <td>${s.pair||''}</td>
-        <td><span class="tag">${s.type||''}</span></td>
-        <td class="${cls}">${s.apr_pct}% ${arrow}${delta}</td>
-        <td>${s.strike}</td>
-        <td>${s.days}</td>
-        <td class="muted">${s.settle||''}</td>
-        <td class="muted">${s.product_id||''}</td>
-      </tr>`;
-  }).join('');
-  body.innerHTML = `
-    <table>
-      <thead><tr>
-        <th>Время</th><th>Пара</th><th>Тип</th><th>APR</th>
-        <th>Страйк</th><th>Дней</th><th>Расчёт</th><th>ID</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
+
+  // 2) множества страйков/дней
+  const strikes = [...new Set([...last.values()].map(x=>x.strike))].sort((a,b)=>b-a).slice(0, cfg.maxStrikes);
+  const days    = [...new Set([...last.values()].map(x=>x.days))].sort((a,b)=>a-b);
+
+  // 3) строим матрицу и HTML
+  let html = '';
+  html += '<table><thead><tr><th>Days\\Strike</th>';
+  for(const s of strikes) html += `<th>${fmtStrike(s)}</th>`;
+  html += '</tr></thead><tbody>';
+
+  for(const d of days){
+    html += `<tr><td>${d}</td>`;
+    for(const s of strikes){
+      const key = `${s}|${d}`;
+      const rec = last.get(key);
+      if(!rec){ html += `<td class="muted">—</td>`; continue; }
+      const apr = rec.apr;
+      const prevApr = prevMap.get(key);
+      let cls = 'muted', arrow=' ';
+      if(prevApr!=null && isFinite(prevApr) && prevApr!==apr){
+        if(apr>prevApr){ cls='up'; arrow='▲'; }
+        else { cls='dn'; arrow='▼'; }
+      }
+      html += `<td class="${cls}">${apr.toFixed(1)}${arrow}</td>`;
+      // обновляем prev для след. опроса
+      prevMap.set(key, apr);
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+
+  tableEl.innerHTML = html;
 }
 
-async function refresh(){
-  const [snap, hist] = await Promise.all([
-    safeFetch('last.json'),
-    safeFetch('signals.json')
-  ]);
-  renderSnapshot(snap);
-  renderHistory(hist);
+function fmtStrike(s){
+  // красивее: целое без .0, иначе как есть
+  return (Math.round(s)===s) ? String(s) : s.toFixed(2);
 }
-refresh();
-setInterval(refresh, 10000);
+
+// первый запуск
+schedule();
+pull();
 </script>
 </body>
 </html>
